@@ -26,8 +26,8 @@ void CPU::setInput(const bool inM[16], const bool instruction[16], const bool re
     for (int i = 0; i < 16; i++) {
         this->outM[i] = ALUOut[i];
     }
-    
-    bool gt,notGt, andZr, andNg, andGt, orRes, isC, pcLoad;
+
+    bool gt, notGt,andZr, andNg, andGt, orRes, isC, pcLoad;
 
     Or(zr, ng, notGt);
     Not(notGt,gt);
@@ -35,10 +35,9 @@ void CPU::setInput(const bool inM[16], const bool instruction[16], const bool re
     And(instruction[14], zr, andZr);
     And(instruction[15], gt, andGt);
 
-
     Or(andZr, andNg, orRes);
     Or(orRes, andGt, isC);
-    And(isC,instructionFirstBit,pcLoad);
+    And(isC, instructionFirstBit, pcLoad);
 
     inc = DC;
 
@@ -96,15 +95,25 @@ void ROM32k::finishClock() {
     Mux16(cur[0].get(), cur[1].get(), this->add, this->current);
 }
 
+void ScreenDiff::set(const bool in[16], const bool load, const bool address[13]) {
+    for (int i = 0; i < 16; i++) {
+        this->in[i] = in[i];
+    }
+    this->load = load;
+    for (int i = 0; i < 13; i++) {
+        this->address[i] = address[i];
+    }
+}
 // Screen
 void Screen::setInput(const bool in[16], const bool load, const bool address[13]) {
+    this->future->set(in, load, address);
     auto& cur = this->ram;
     bool addLeft[12], bus[2];
     for (int i = 0; i < 12; i++) {
         addLeft[i] = address[i];
     }
     add = address[12];
-    DMux(load,add,bus[0],bus[1]);
+    DMux(load, add, bus[0], bus[1]);
     for (int i = 0; i < 2; i++) {
         cur[i].setInput(in, addLeft, bus[i]);
     }
@@ -117,10 +126,10 @@ void Screen::finishClock() {
     }
     auto& cur = this->ram;
     Mux16(cur[0].get(), cur[1].get(), this->add, this->current);
-}
 
-bool****** Screen::getScreen() {
-    return this->currentScreen;
+    ScreenDiff* temp = this->screenDiff;
+    this->screenDiff = this->future;
+    this->future = temp;
 }
 
 // Keyboard
@@ -139,7 +148,7 @@ void Memory::setInput(const bool in[16], const bool load, const bool address[15]
     bool ram1[16], ram2[16];
 
     DMux4Way(load, add, loadRam1, loadRam2, loadScreen, loadKey);
-    Or(loadRam1,loadRam2,loadRam);
+    Or(loadRam1, loadRam2, loadRam);
 
     for (int i = 0; i < 14; i++) {
         left14[i] = address[i];
@@ -152,12 +161,11 @@ void Memory::setInput(const bool in[16], const bool load, const bool address[15]
     this->ram.setInput(in, left14, loadRam);
     this->screen.setInput(in, loadScreen, left13);
 
-    Mux4Way16(this->ram.get(),this->ram.get(), this->screen.get(), this->keyboard.get(),add, this->current);
-
+    Mux4Way16(this->ram.get(), this->ram.get(), this->screen.get(), this->keyboard.get(), add, this->current);
 }
 
 void Memory::finishClock() {
     this->ram.finishClock();
     this->screen.finishClock();
-    Mux4Way16(this->ram.get(),this->ram.get(), this->screen.get(), this->keyboard.get(),this->add, this->current);
+    Mux4Way16(this->ram.get(), this->ram.get(), this->screen.get(), this->keyboard.get(), this->add, this->current);
 }

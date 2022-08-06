@@ -60,26 +60,37 @@ class ROM32k {
     }
 };
 
+// For sending screen's diffrence
+class ScreenDiff{
+    public:
+        bool in[16];
+        bool load;
+        bool address[13];
+    void set(const bool in[16], const bool load, const bool address[13]);
+};
+
 // Screen
 class Screen {
    private:
     RAM4k* ram;
     bool add;
     bool current[16];
-    bool***** currentScreen[2];
+    ScreenDiff *screenDiff;
+    ScreenDiff *future;
 
    public:
     Screen() {
         this->ram = new RAM4k[2];
-        for(int i = 0; i < 2; i ++){
-        this->currentScreen[i] = ram[i].getAll();
-        }
-
+        this->screenDiff = new ScreenDiff;
+        this->future = new ScreenDiff;
     }
 
     void setInput(const bool in[16], const bool load, const bool address[13]);
     void finishClock();
-    bool****** getScreen();
+
+    ScreenDiff* getScreen(){
+        return screenDiff;
+    }
 
     bool* get() {
         return this->current;
@@ -87,6 +98,8 @@ class Screen {
 
     ~Screen() {
         delete[] this->ram;
+        delete screenDiff;
+        delete future;
     }
 };
 
@@ -116,7 +129,7 @@ class Memory {
     void setInput(const bool in[16], const bool load, const bool address[15]);
     void finishClock();
 
-    bool****** getScreen() {
+    ScreenDiff* getScreen(){
         return this->screen.getScreen();
     }
 

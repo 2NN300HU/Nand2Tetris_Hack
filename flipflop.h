@@ -79,15 +79,10 @@ class RAM8 {
     Register* reg;
     bool add[3] = {0};
     bool current[16] = {0};
-    bool** currentAll;
 
    public:
     RAM8() {
         this->reg = new Register[8];
-        this->currentAll = new bool*[8];
-        for (int i = 0; i < 8; i++) {
-            currentAll[i] = this->reg[i].get();
-        }
     }
 
     void setInput(const bool in[16], const bool address[3], const bool load);
@@ -98,13 +93,9 @@ class RAM8 {
         return this->current;
     }
 
-    bool** getAll() {
-        return this->currentAll;
-    }
 
     ~RAM8() {
         delete[] this->reg;
-        delete[] this->currentAll;
     }
 };
 
@@ -114,15 +105,10 @@ class RAM64 {
     RAM8* ram;
     bool add[3] = {0};
     bool current[16] = {0};
-    bool*** currentAll;
 
    public:
     RAM64() {
         this->ram = new RAM8[8];
-        this->currentAll = new bool**[8];
-        for (int i = 0; i < 8; i++) {
-            currentAll[i] = this->ram[i].getAll();
-        }
     }
 
     void setInput(const bool in[16], const bool address[6], const bool load);
@@ -133,13 +119,8 @@ class RAM64 {
         return this->current;
     }
 
-    bool*** getAll() {
-        return this->currentAll;
-    }
-
     ~RAM64() {
         delete[] this->ram;
-        delete[] this->currentAll;
     }
 };
 
@@ -149,15 +130,10 @@ class RAM512 {
     RAM64* ram;
     bool add[3] = {0};
     bool current[16] = {0};
-    bool**** currentAll;
 
    public:
     RAM512() {
         this->ram = new RAM64[8];
-        this->currentAll = new bool***[8];
-        for (int i = 0; i < 8; i++) {
-            currentAll[i] = this->ram[i].getAll();
-        }
     }
 
     void finishClock();
@@ -166,41 +142,29 @@ class RAM512 {
     bool* get() {
         return this->current;
     }
-    
-    bool**** getAll() {
-        return this->currentAll;
-    }
 
     ~RAM512() {
         delete[] this->ram;
-        delete[] this->currentAll;
     }
 };
 
 // 4k
 class RAM4k {
    private:
-    RAM512* ram;
-    bool add[3] = {0};
+    bool *ram;
+    int address = 0;
+    bool in[16] = {0};
+    bool load;
     bool current[16] = {0};
-    bool***** currentAll;
 
    public:
     RAM4k() {
-        this->ram = new RAM512[8];
-        this->currentAll = new bool****[8];
-        for (int i = 0; i < 8; i++) {
-            currentAll[i] = this->ram[i].getAll();
-        }
+        this->ram  = new bool[65536];
     }
 
     void setInput(const bool in[16], const bool address[12], const bool load);
 
     void finishClock();
-
-    bool***** getAll() {
-        return this->currentAll;
-    }
 
     bool* get() {
         return this->current;
@@ -208,7 +172,6 @@ class RAM4k {
 
     ~RAM4k() {
         delete[] this->ram;
-        delete[] this->currentAll;
     }
 };
 

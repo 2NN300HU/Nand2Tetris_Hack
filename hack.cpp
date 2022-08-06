@@ -12,7 +12,7 @@ int main() {
     computer.finishClock();
     computer.setInput(0);
     bool key[16] = {0};
-    bool****** newScreen;
+    ScreenDiff* newScreen;
     int keyValue, current;
     while (true){
         if (_kbhit()) {

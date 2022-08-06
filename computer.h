@@ -21,7 +21,7 @@ class Computer {
     void setInput(const bool reset);
     void finishClock();
 
-    bool****** getScreen() {
+    ScreenDiff *getScreen() {
         return this->dataMemory.getScreen();
     }
 
@@ -43,7 +43,7 @@ class Monitor {
    public:
     Monitor();
 
-    void printScreen(bool****** newScreen);
+    void printScreen(const ScreenDiff* newScreen);
     ~Monitor() {
         delete[] currentScreen;
     }

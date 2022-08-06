@@ -102,22 +102,18 @@ Monitor::Monitor() {
     system("mode con cols=512 lines=256 | title Hack");
 }
 
-void Monitor::printScreen(bool ******newScreen) {
-    int i = 0;
-    for (int a = 0; a < 2; a++) {
-        for (int b = 0; b < 8; b++) {
-            for (int c = 0; c < 8; c++) {
-                for (int d = 0; d < 8; d++) {
-                    for (int e = 0; e < 8; e++) {
-                        for (int f = 0; f < 16; f++) {
-                            if (newScreen[a][b][c][d][e][f] != this->currentScreen[i]) {
-                                printPixel(i, newScreen[a][b][c][d][e][f]);
-                                this->currentScreen[i] = newScreen[a][b][c][d][e][f];
-                            }
-                            i++;
-                        }
-                    }
-                }
+void Monitor::printScreen(const ScreenDiff* newScreen){
+    if(newScreen->load){
+        int address = 0;
+        for(int i = 0; i<13;i++){
+            address = address*2+newScreen->address[12-i];
+        }
+        address *=16;
+
+        for (int i = 0; i < 16; i++) {
+            if (newScreen->in[i] != this->currentScreen[i]) {
+                printPixel(address+i, newScreen->in[i]);
+                this->currentScreen[i] = newScreen->in[i];
             }
         }
     }

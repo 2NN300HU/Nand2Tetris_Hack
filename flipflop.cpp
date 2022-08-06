@@ -99,28 +99,34 @@ void RAM512::finishClock() {
 
 // 4k
 void RAM4k::setInput(const bool in[16], const bool address[12], const bool load) {
-    auto& cur = this->ram;
-    bool bus[8], addLeft[9];
-    for (int i = 0; i < 9; i++) {
-        addLeft[i] = address[i];
-    }
-    for (int i = 0; i < 3; i++) {
-        add[i] = address[i + 9];
+    for (int i = 0; i < 16; i++) {
+        this->in[i] = in[i];
     }
 
-    DMux8Way(load, add, bus[0], bus[1], bus[2], bus[3], bus[4], bus[5], bus[6], bus[7]);
-    for (int i = 0; i < 8; i++) {
-        cur[i].setInput(in, addLeft, bus[i]);
+    this->load = load;
+
+    int add = 0;
+    for (int i = 0; i < 12; i++) {
+        add = add * 2 ;
+        if(address[11 - i]){
+            add++;
+        }
+
     }
-    Mux8Way16(cur[0].get(), cur[1].get(), cur[2].get(), cur[3].get(), cur[4].get(), cur[5].get(), cur[6].get(), cur[7].get(), add, this->current);
+    add *= 16;
+    this->address = add;
+
+    for (int i = 0; i < 16; i++) {
+        this->current[i] = this->ram[add + i];
+    }
 }
 
 void RAM4k::finishClock() {
-    for (int i = 0; i < 8; i++) {
-        this->ram[i].finishClock();
+    if (this->load) {
+        for (int i = 0; i < 16; i++) {
+            this->ram[this->address + i] = this->in[i];
+        }
     }
-    auto& cur = this->ram;
-    Mux8Way16(cur[0].get(), cur[1].get(), cur[2].get(), cur[3].get(), cur[4].get(), cur[5].get(), cur[6].get(), cur[7].get(), add, this->current);
 }
 
 // 16k
