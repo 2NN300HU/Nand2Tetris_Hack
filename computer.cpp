@@ -20,18 +20,22 @@ void Computer::finishClock() {
 void Computer::writeProgram(const std::string fileName) {
     int length;
     unsigned char *buffer;
-    std::ifstream is(fileName, std::ifstream::binary);
-    if (is) {
-        is.seekg(0, is.end);
-        length = (int)is.tellg();
-        is.seekg(0, is.beg);
+    int divider = fileName.length() - 5;
+    auto ext = fileName.substr(divider);
+    if (ext != ".hack") throw std::invalid_argument("The given file is not .hack file");
+    std::ifstream is;
+    is.open(fileName, std::ifstream::binary);
+    if (!is.is_open()) throw std::invalid_argument(fileName + " doesn't exists");
 
-        buffer = new unsigned char[length];
-        is.read((char *)buffer, length);
-        is.close();
-    }
+    is.seekg(0, is.end);
+    length = (int)is.tellg();
+    is.seekg(0, is.beg);
+
+    buffer = new unsigned char[length];
+    is.read((char *)buffer, length);
+    is.close();
     bool program[16];
-    bool address[15] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+    bool address[15] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
     int lines = length / 2;
     for (int k = 0; k < lines; k++) {
         unsigned char current = buffer[k * 2];
