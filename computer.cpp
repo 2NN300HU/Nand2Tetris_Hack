@@ -97,6 +97,9 @@ void Monitor::cursorOff() {
 
 Monitor::Monitor() {
     currentScreen = new bool[512 * 256];
+    for(int i = 0 ; i < 512*256;i++){
+        currentScreen[i]=0;
+    }
     smallFont();
     cursorOff();
     system("mode con cols=512 lines=256 | title Hack");
